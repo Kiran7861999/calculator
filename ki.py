@@ -7,30 +7,47 @@
 # st.write(f'the addition is {num1+num2}')
 import streamlit as st
 
-# Title
-st.title("Simple Calculator")
+# Initialize session state for storing books
+if "books" not in st.session_state:
+    st.session_state.books = []
 
-# Input numbers
-num1 = st.number_input("Enter first number", format="%.2f")
-num2 = st.number_input("Enter second number", format="%.2f")
+# App title
+st.title("📚 Simple Book Store")
 
-# Select operation
-operation = st.selectbox("Choose operation", ["Add", "Subtract", "Multiply", "Divide"])
+# Tabs for navigation
+tab = st.radio("Navigate", ["Add Book", "View Books", "Search Book"])
 
-# Perform calculation
-result = None
-if operation == "Add":
-    result = num1 + num2
-elif operation == "Subtract":
-    result = num1 - num2
-elif operation == "Multiply":
-    result = num1 * num2
-elif operation == "Divide":
-    if num2 != 0:
-        result = num1 / num2
+# Add Book
+if tab == "Add Book":
+    st.header("➕ Add a New Book")
+    title = st.text_input("Book Title")
+    author = st.text_input("Author")
+    price = st.number_input("Price ($)", min_value=0.0, format="%.2f")
+    
+    if st.button("Add Book"):
+        if title and author:
+            st.session_state.books.append({"title": title, "author": author, "price": price})
+            st.success("Book added successfully!")
+        else:
+            st.warning("Please fill in all fields.")
+
+# View Books
+elif tab == "View Books":
+    st.header("📖 All Books")
+    if st.session_state.books:
+        for idx, book in enumerate(st.session_state.books, start=1):
+            st.markdown(f"**{idx}. {book['title']}** by {book['author']} - ${book['price']:.2f}")
     else:
-        st.error("Cannot divide by zero")
+        st.info("No books in the store yet.")
 
-# Display result
-if result is not None:
-    st.success(f"Result: {result}")
+# Search Book
+elif tab == "Search Book":
+    st.header("🔍 Search Book by Title")
+    query = st.text_input("Enter title keyword")
+    if query:
+        results = [book for book in st.session_state.books if query.lower() in book['title'].lower()]
+        if results:
+            for book in results:
+                st.markdown(f"**{book['title']}** by {book['author']} - ${book['price']:.2f}")
+        else:
+            st.warning("No matching books found.")
